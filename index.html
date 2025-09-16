@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 나노 바나나 프롬프트 최적화 도우미-secondbrainlab.com v2</title>
+    <title>Gemini 나노 바나나 프롬프트 최적화 도우미-secondbrainlab.com v3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -78,6 +78,9 @@
                 <textarea id="userInput"
                     class="w-full h-48 bg-gray-900 border border-gray-700 rounded-md p-4 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                     placeholder="예시) 배경 사람 지워줘, 빨간 모자 추가해줘, 유니폼을 모델에게 입혀줘..."></textarea>
+                <button id="submitButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 text-lg">
+                    최적화 실행
+                </button>
             </div>
 
             <!-- Output Panel -->
@@ -108,7 +111,7 @@
                             <li>"배경 사람 지워줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...remove the 사람 from the scene.</code></li>
                             <li>"빨간 모자 추가해줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...add a hat to the scene.</code></li>
                             <li>"유니폼을 모델에게 입혀줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">Take the 유니폼 and place it on...</code></li>
-                             <li>"1번 남자를 지우고 2번 남자로 변경" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...remove the 1번 남자... and replace them with the 2번 남자.</code></li>
+                             <li>"1번 남자를 2번 남자로 대체해줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...take the 2번 남자 and use it to replace...</code></li>
                             <li>"파란색으로 바꿔줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...change the color to blue.</code></li>
                             <li>"숫자 5를 10으로 변경" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...change the number to 10.</code></li>
                         </ul>
@@ -168,6 +171,7 @@
         const optimizedOutput = document.getElementById('optimizedOutput');
         const copyButton = document.getElementById('copyButton');
         const toast = document.getElementById('toast');
+        const submitButton = document.getElementById('submitButton');
 
         const koreanNumberMap = {
             '일': 1, '이': 2, '삼': 3, '사': 4, '오': 5,
@@ -189,21 +193,29 @@
 
             // --- 간단 편집 모드 ---
 
-            // 예: "배경 사람 지워줘"
-            let match = text.match(/(.+?)\s*(지워줘|제거해줘)/);
+            // "A를 B로 대체해줘" (Complex replacement)
+            let match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:으로|로)\s+대체해줘/);
+            if (match) {
+                const subjectToReplace = match[1].trim();
+                const newSubject = match[2].trim();
+                return `Using the provided images, take the ${newSubject} and use it to replace the ${subjectToReplace}. Ensure the final image is a realistic composite, seamlessly integrating with the original scene's lighting, perspective, and style.`;
+            }
+
+            // "배경 사람 지워줘"
+            match = text.match(/(.+?)\s*(지워줘|제거해줘)/);
             if (match) {
                 const subject = match[1].trim().replace(/(에서|에 있는)/g, '').trim();
                 return `Using the provided image, please remove the ${subject} from the scene. Keep everything else exactly the same.`;
             }
 
-            // 예: "빨간 모자 추가해줘"
+            // "빨간 모자 추가해줘"
             match = text.match(/(.+?)\s*(추가해줘|넣어줘)/);
             if (match) {
                 const subject = match[1].trim();
                 return `Using the provided image, please add a ${subject} to the scene. Make it fit naturally.`;
             }
 
-            // 예: "1번 남자를 지우고 2번 남자로 변경해줘" (이미지 교체)
+            // "1번 남자를 지우고 2번 남자로 변경해줘" (이미지 교체)
             match = text.match(/(.+?)(?:을|를)\s*지우고\s*(.+?)(?:으로|로)\s*(바꿔줘|변경해줘|교체해줘)/);
             if (match) {
                 const subjectToRemove = match[1].trim();
@@ -211,7 +223,7 @@
                 return `Using the provided images, please remove ${subjectToRemove} from the first image and replace them with ${subjectToAdd}. Ensure the final image is a seamless composite, matching the original lighting, shadows, and style.`;
             }
 
-            // 예: "유니폼을 남자 모델에게 입혀줘" (이미지 합성)
+            // "유니폼을 남자 모델에게 입혀줘" (이미지 합성)
             match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:에게|한테)\s+(입혀줘|씌워줘|합성해줘|합쳐줘)/);
             if (match) {
                 const subject = match[1].trim();
@@ -219,7 +231,7 @@
                 return `Create a new image by combining the elements from the provided images. Take the ${subject} and place it on the ${target}. The final image should be a realistic composite, with lighting and shadows adjusted to match seamlessly.`;
             }
 
-            // 예: "숫자 5를 10으로 변경"
+            // "숫자 5를 10으로 변경"
             match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:으로|으로\s+바꿔줘|으로\s+변경)/);
             if (match) {
                 let from = match[1].trim();
@@ -233,7 +245,7 @@
                 return `Using the provided image, change the ${from} to ${to}. Keep everything else unchanged.`;
             }
 
-            // 예: "파란색으로 바꿔줘"
+            // "파란색으로 바꿔줘"
             match = text.match(/(.+?)(?:으로|으로\s+바꿔줘|으로\s+변경해줘)/);
             if (match) {
                 const subject = match[1].trim();
@@ -242,12 +254,12 @@
 
             // --- 스타일 변경 모드 ---
 
-            // 예: "수채화 스타일로 변환"
+            // "수채화 스타일로 변환"
             if (text.includes("수채화")) {
                 return `Transform the provided image into watercolor painting style while preserving the original composition.`;
             }
 
-            // 예: "빈티지 사진 느낌으로"
+            // "빈티지 사진 느낌으로"
             if (text.includes("빈티지")) {
                 return `Transform the provided image into vintage photography style with warm tones.`;
             }
@@ -256,7 +268,7 @@
             return `"${text}"는 좋은 시작입니다! 더 나은 결과를 위해 장면을 더 자세하게 묘사해 보세요.\n\n[추천 템플릿]\nA photorealistic [촬영 유형] of [주제], [행동], in [환경]. The scene is lit by [조명], creating a [분위기]. Captured with a [카메라/렌즈], emphasizing [디테일].`;
         }
 
-        userInput.addEventListener('input', () => {
+        submitButton.addEventListener('click', () => {
             const optimizedText = optimizePrompt(userInput.value);
             optimizedOutput.textContent = optimizedText;
         });
