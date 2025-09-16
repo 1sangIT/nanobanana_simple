@@ -3,301 +3,532 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 나노 바나나 프롬프트 최적화 도우미-secondbrainlab.com v3</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Gemini Prompt Optimizer - v1 </title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
         }
-        .guide-content h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #38bdf8; /* sky-400 */
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .guide-content p {
-            margin-bottom: 1rem;
-            color: #d1d5db; /* gray-300 */
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
         }
-        .guide-content code {
-            background-color: #374151; /* gray-700 */
-            color: #f3f4f6; /* gray-100 */
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-size: 0.9em;
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .guide-content .template {
-            background-color: #1f2937; /* gray-800 */
-            border-left: 4px solid #38bdf8; /* sky-400 */
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 0.25rem;
+
+        .header p {
+            font-size: 1.2rem;
+            color: #cccccc;
+            margin-bottom: 20px;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            background: #333333;
+            border: 2px solid #555555;
+            color: #ffffff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .mode-btn:hover {
+            background: #444444;
+            border-color: #777777;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: #ffffff;
+            color: #1a1a1a;
+            border-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            min-height: 600px;
+        }
+
+        .input-section, .output-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-textarea, .output-textarea {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            color: #ffffff;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .input-textarea:focus, .output-textarea:focus {
+            outline: none;
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .output-textarea {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .optimize-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ffffff, #e0e0e0);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .optimize-btn:hover {
+            background: linear-gradient(45deg, #f0f0f0, #d0d0d0);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            margin-top: 15px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .examples-section {
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .example-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 4px solid #ffffff;
+        }
+
+        .example-before {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .example-after {
+            color: #51cf66;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #cccccc;
             font-style: italic;
         }
-        .guide-content strong {
-            color: #60a5fa; /* blue-400 */
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: #22c55e; /* green-500 */
-            color: white;
+
+        .improvement-list {
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
         }
-        .toast.show {
-            opacity: 1;
+
+        .improvement-item {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+
+        .improvement-item::before {
+            content: "✓ ";
+            color: #51cf66;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
-
-    <div class="container mx-auto p-4 md:p-8 relative">
-        <div class="absolute top-4 right-4 md:top-8 md:right-8 text-right text-xs text-gray-500">
-            <p>made by secondbrainlab.com</p>
-            <p><a href="mailto:sblab@secondbrainlab.com" class="hover:text-gray-300">sblab@secondbrainlab.com</a></p>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Gemini Prompt Optimizer</h1>
+            <p>AI 이미지 생성을 위한 프롬프트를 최적화해보세요</p>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('text-to-image')">🎨 텍스트→이미지</button>
+                <button class="mode-btn" onclick="switchMode('photo-editing')">📸 사진 편집</button>
+                <button class="mode-btn" onclick="switchMode('style-transfer')">🎭 스타일 변경</button>
+                <button class="mode-btn" onclick="switchMode('product-mockup')">🛍️ 제품 사진</button>
+                <button class="mode-btn" onclick="switchMode('logo-design')">💎 로고/텍스트</button>
+            </div>
         </div>
 
-        <header class="text-center mb-8 pt-12 md:pt-0">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Gemini 나노 바나나 프롬프트 최적화 도우미</h1>
-            <p class="text-gray-400">간단한 아이디어를 입력하면 이미지 생성에 최적화된 영어 프롬프트로 변환해 드립니다.</p>
-        </header>
+        <div class="main-content">
+            <div class="input-section">
+                <h3 class="section-title">📝 원본 프롬프트 입력</h3>
+                <textarea class="input-textarea" id="inputPrompt" placeholder="여기에 최적화하고 싶은 프롬프트를 입력하세요...
 
-        <main class="grid grid-cols-1 gap-6">
-            <!-- Input Panel -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-white">1. 프롬프트 입력하기</h2>
-                <textarea id="userInput"
-                    class="w-full h-48 bg-gray-900 border border-gray-700 rounded-md p-4 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                    placeholder="예시) 배경 사람 지워줘, 빨간 모자 추가해줘, 유니폼을 모델에게 입혀줘..."></textarea>
-                <button id="submitButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 text-lg">
-                    최적화 실행
-                </button>
+예시:
+- 배경 사람 지워줘
+- 빨간 모자 추가해줘
+- 수채화 스타일로 변환
+- 로고 만들어줘"></textarea>
+                <button class="optimize-btn" onclick="optimizePrompt()">🚀 프롬프트 최적화하기</button>
             </div>
 
-            <!-- Output Panel -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-semibold text-white">2. 최적화된 프롬프트</h2>
-                    <button id="copyButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 flex items-center gap-2">
-                        <i class="fas fa-copy"></i>
-                        <span>복사</span>
-                    </button>
-                </div>
-                <div id="optimizedOutputWrapper" class="w-full h-48 bg-gray-900 border border-gray-700 rounded-md p-4 overflow-y-auto">
-                    <p id="optimizedOutput" class="text-gray-300 whitespace-pre-wrap">최적화된 프롬프트가 여기에 표시됩니다...</p>
+            <div class="output-section">
+                <h3 class="section-title">✨ 최적화된 프롬프트</h3>
+                <div class="loading" id="loading">프롬프트를 최적화하고 있습니다...</div>
+                <textarea class="output-textarea" id="outputPrompt" readonly placeholder="최적화된 프롬프트가 여기에 표시됩니다..."></textarea>
+                <button class="copy-btn" onclick="copyToClipboard()" id="copyBtn" style="display: none;">📋 복사하기</button>
+                
+                <div class="improvement-list" id="improvements">
+                    <h4 style="color: #ffffff; margin-bottom: 10px;">🎯 개선 포인트</h4>
+                    <div id="improvementsList"></div>
                 </div>
             </div>
-        </main>
-        
-        <!-- Examples and Guide Section -->
-        <section class="mt-10 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <details open>
-                <summary class="text-xl font-bold cursor-pointer text-white hover:text-blue-400">
-                    빠른 시작 예시
-                </summary>
-                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <h3 class="font-semibold text-sky-400">간단 편집 및 합성 모드</h3>
-                        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-300">
-                            <li>"배경 사람 지워줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...remove the 사람 from the scene.</code></li>
-                            <li>"빨간 모자 추가해줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...add a hat to the scene.</code></li>
-                            <li>"유니폼을 모델에게 입혀줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">Take the 유니폼 and place it on...</code></li>
-                             <li>"1번 남자를 2번 남자로 대체해줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...take the 2번 남자 and use it to replace...</code></li>
-                            <li>"파란색으로 바꿔줘" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...change the color to blue.</code></li>
-                            <li>"숫자 5를 10으로 변경" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">...change the number to 10.</code></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-sky-400">스타일 변경 모드</h3>
-                         <ul class="list-disc list-inside mt-2 space-y-1 text-gray-300">
-                            <li>"수채화 스타일로 변환" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">Transform... into watercolor painting style...</code></li>
-                            <li>"빈티지 사진 느낌으로" <i class="fas fa-arrow-right mx-1 text-gray-500"></i> <code class="text-xs">Transform... into vintage photography style...</code></li>
-                        </ul>
-                    </div>
+        </div>
+
+        <div class="examples-section">
+            <h3 class="section-title">💡 최적화 예시</h3>
+            <div id="examples-container">
+                <div class="example-item">
+                    <div class="example-before">원본: 배경 사람 지워줘</div>
+                    <div class="example-after">최적화: Using the provided image, please remove all people from the background scene. Keep everything else exactly the same, including lighting, composition, and all other objects.</div>
                 </div>
-            </details>
-        </section>
-
-        <section class="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <details>
-                <summary class="text-xl font-bold cursor-pointer text-white hover:text-blue-400">
-                    Gemini 2.5 Flash Image 프롬프트 가이드
-                </summary>
-                <div class="mt-4 guide-content">
-                    <p>Gemini 2.5 Flash는 텍스트와 이미지를 통합적으로 처리하는 고유한 멀티모달 아키텍처를 가지고 있습니다. 단순한 키워드 나열보다, <strong>장면을 묘사하는 서술적인 문장</strong>이 훨씬 더 좋고 일관성 있는 이미지를 만들어냅니다.</p>
-
-                    <h3>1. 사실적인 장면 (Photorealistic scenes)</h3>
-                    <p>사진작가처럼 생각하세요. 카메라 각도, 렌즈 종류, 조명, 세부 사항을 언급하면 사실적인 결과를 얻는 데 도움이 됩니다.</p>
-                    <div class="template">
-                        <p><strong>템플릿:</strong> A photorealistic [촬영 유형] of [주제], [행동 또는 표정], set in [환경]. The scene is illuminated by [조명 설명], creating a [분위기] atmosphere. Captured with a [카메라/렌즈 정보], emphasizing [핵심 질감과 디테일]. The image should be in a [가로세로 비율] format.</p>
-                    </div>
-
-                    <h3>2. 스타일화된 일러스트 & 스티커 (Stylized illustrations & stickers)</h3>
-                    <p>스티커, 아이콘 등을 만들 때는 스타일을 명확히 하고, 필요하다면 흰색 배경을 요청하는 것을 잊지 마세요.</p>
-                     <div class="template">
-                        <p><strong>템플릿:</strong> A [스타일] sticker of a [주제], featuring [핵심 특징] and a [색상 팔레트]. The design should have [선 스타일] and [음영 스타일]. The background must be white.</p>
-                    </div>
-
-                    <h3>3. 이미지 편집: 요소 추가 및 제거</h3>
-                    <p>이미지를 제공하고 원하는 변경 사항을 설명하기만 하면 됩니다. 모델은 원본 이미지의 스타일, 조명, 원근을 분석하여 편집이 자연스럽게 보이도록 합니다.</p>
-                    <div class="template">
-                        <p><strong>템플릿:</strong> Using the provided image of [주제], please [추가/제거/수정] [요소] to/from the scene. Ensure the change is [변경 사항이 통합되어야 하는 방식에 대한 설명].</p>
-                    </div>
-                    
-                    <h3>4. 스타일 변환 (Style transfer)</h3>
-                    <p>사진을 제공하고 특정 스타일이나 예술 사조로 내용을 재현하도록 요청하세요.</p>
-                    <div class="template">
-                        <p><strong>템플릿:</strong> Transform the provided photograph of [주제] into the artistic style of [아티스트/아트 스타일]. Preserve the original composition but render it with [스타일 요소에 대한 설명].</p>
-                    </div>
-
+                <div class="example-item">
+                    <div class="example-before">원본: 빨간 모자 추가해줘</div>
+                    <div class="example-after">최적화: Using the provided image, please add a bright red hat to the person's head. Make sure it fits naturally and matches the lighting and perspective of the original photo.</div>
                 </div>
-            </details>
-        </section>
-
+            </div>
+        </div>
     </div>
-    <div id="toast" class="toast">복사되었습니다!</div>
 
     <script>
-        const userInput = document.getElementById('userInput');
-        const optimizedOutput = document.getElementById('optimizedOutput');
-        const copyButton = document.getElementById('copyButton');
-        const toast = document.getElementById('toast');
-        const submitButton = document.getElementById('submitButton');
+        let currentMode = 'text-to-image';
 
-        const koreanNumberMap = {
-            '일': 1, '이': 2, '삼': 3, '사': 4, '오': 5,
-            '육': 6, '칠': 7, '팔': 8, '구': 9, '십': 10
-        };
-
-        const convertKoreanNumber = (koreanNum) => {
-            const num = koreanNum.replace(/[^\d십일이삼사오육칠팔구]/g, '');
-            if (!isNaN(num)) return num;
-
-            return koreanNumberMap[num] || koreanNum;
-        };
-
-        const optimizePrompt = (inputText) => {
-            const text = inputText.trim();
-            if (!text) {
-                return "최적화된 프롬프트가 여기에 표시됩니다...";
-            }
-
-            // --- 간단 편집 모드 ---
-
-            // "A를 B로 대체해줘" (Complex replacement)
-            let match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:으로|로)\s+대체해줘/);
-            if (match) {
-                const subjectToReplace = match[1].trim();
-                const newSubject = match[2].trim();
-                return `Using the provided images, take the ${newSubject} and use it to replace the ${subjectToReplace}. Ensure the final image is a realistic composite, seamlessly integrating with the original scene's lighting, perspective, and style.`;
-            }
-
-            // "배경 사람 지워줘"
-            match = text.match(/(.+?)\s*(지워줘|제거해줘)/);
-            if (match) {
-                const subject = match[1].trim().replace(/(에서|에 있는)/g, '').trim();
-                return `Using the provided image, please remove the ${subject} from the scene. Keep everything else exactly the same.`;
-            }
-
-            // "빨간 모자 추가해줘"
-            match = text.match(/(.+?)\s*(추가해줘|넣어줘)/);
-            if (match) {
-                const subject = match[1].trim();
-                return `Using the provided image, please add a ${subject} to the scene. Make it fit naturally.`;
-            }
-
-            // "1번 남자를 지우고 2번 남자로 변경해줘" (이미지 교체)
-            match = text.match(/(.+?)(?:을|를)\s*지우고\s*(.+?)(?:으로|로)\s*(바꿔줘|변경해줘|교체해줘)/);
-            if (match) {
-                const subjectToRemove = match[1].trim();
-                const subjectToAdd = match[2].trim();
-                return `Using the provided images, please remove ${subjectToRemove} from the first image and replace them with ${subjectToAdd}. Ensure the final image is a seamless composite, matching the original lighting, shadows, and style.`;
-            }
-
-            // "유니폼을 남자 모델에게 입혀줘" (이미지 합성)
-            match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:에게|한테)\s+(입혀줘|씌워줘|합성해줘|합쳐줘)/);
-            if (match) {
-                const subject = match[1].trim();
-                const target = match[2].trim();
-                return `Create a new image by combining the elements from the provided images. Take the ${subject} and place it on the ${target}. The final image should be a realistic composite, with lighting and shadows adjusted to match seamlessly.`;
-            }
-
-            // "숫자 5를 10으로 변경"
-            match = text.match(/(.+?)(?:을|를)\s+(.+?)(?:으로|으로\s+바꿔줘|으로\s+변경)/);
-            if (match) {
-                let from = match[1].trim();
-                let to = match[2].trim();
-
-                if (from.startsWith('숫자')) {
-                    from = `number ${convertKoreanNumber(from.replace('숫자','').trim())}`;
-                    to = `${convertKoreanNumber(to)}`;
+        const examples = {
+            'text-to-image': [
+                {
+                    before: "예쁜 여자 그려줘",
+                    after: "A photorealistic portrait of a beautiful young woman with flowing auburn hair and gentle green eyes, soft natural makeup, sitting in a sunlit café. Captured with an 85mm portrait lens with shallow depth of field. Warm, natural lighting creating a serene atmosphere."
+                },
+                {
+                    before: "고양이 그림",
+                    after: "A high-quality digital illustration of a fluffy orange tabby cat sitting gracefully on a windowsill, sunlight streaming through lace curtains. The cat has bright amber eyes and a content expression."
                 }
+            ],
+            'photo-editing': [
+                {
+                    before: "배경 사람 지워줘",
+                    after: "Using the provided image, please remove all people from the background scene. Keep everything else exactly the same, including lighting, composition, and all other objects."
+                },
+                {
+                    before: "빨간 모자 추가해줘",
+                    after: "Using the provided image, please add a bright red knitted beanie hat to the person's head. Make sure it fits naturally and matches the lighting and perspective."
+                }
+            ],
+            'style-transfer': [
+                {
+                    before: "수채화 스타일로 변환",
+                    after: "Transform the provided image into a beautiful watercolor painting style. Preserve the original composition but render it with soft, flowing watercolor brushstrokes."
+                },
+                {
+                    before: "빈티지 사진 느낌으로",
+                    after: "Transform the provided image into vintage photography style from the 1970s. Add warm, sepia tones, slight grain texture, and nostalgic atmosphere."
+                }
+            ],
+            'product-mockup': [
+                {
+                    before: "제품 사진 찍어줘",
+                    after: "A high-resolution, professional studio-lit product photograph on a clean white background. The lighting uses a three-point softbox setup to eliminate harsh shadows."
+                }
+            ],
+            'logo-design': [
+                {
+                    before: "로고 만들어줘",
+                    after: "Create a modern, minimalist logo design with clean typography and sophisticated color scheme. The design should be scalable and work well in both color and monochrome versions."
+                }
+            ]
+        };
 
-                return `Using the provided image, change the ${from} to ${to}. Keep everything else unchanged.`;
-            }
-
-            // "파란색으로 바꿔줘"
-            match = text.match(/(.+?)(?:으로|으로\s+바꿔줘|으로\s+변경해줘)/);
-            if (match) {
-                const subject = match[1].trim();
-                return `Using the provided image, change the color to ${subject}. Keep everything else unchanged.`;
-            }
-
-            // --- 스타일 변경 모드 ---
-
-            // "수채화 스타일로 변환"
-            if (text.includes("수채화")) {
-                return `Transform the provided image into watercolor painting style while preserving the original composition.`;
-            }
-
-            // "빈티지 사진 느낌으로"
-            if (text.includes("빈티지")) {
-                return `Transform the provided image into vintage photography style with warm tones.`;
-            }
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateExamples();
             
-            // --- 일반 프롬프트 강화 ---
-            return `"${text}"는 좋은 시작입니다! 더 나은 결과를 위해 장면을 더 자세하게 묘사해 보세요.\n\n[추천 템플릿]\nA photorealistic [촬영 유형] of [주제], [행동], in [환경]. The scene is lit by [조명], creating a [분위기]. Captured with a [카메라/렌즈], emphasizing [디테일].`;
+            const placeholder = getPlaceholderText(mode);
+            document.getElementById('inputPrompt').placeholder = placeholder;
         }
 
-        submitButton.addEventListener('click', () => {
-            const optimizedText = optimizePrompt(userInput.value);
-            optimizedOutput.textContent = optimizedText;
-        });
+        function getPlaceholderText(mode) {
+            const placeholders = {
+                'text-to-image': '여기에 생성하고 싶은 이미지를 설명해주세요...\n\n예시:\n- 예쁜 여자 그려줘\n- 고양이 그림\n- 풍경 사진 만들어줘',
+                'photo-editing': '편집하고 싶은 내용을 입력해주세요...\n\n예시:\n- 배경 사람 지워줘\n- 빨간 모자 추가해줘\n- 파란색으로 바꿔줘',
+                'style-transfer': '변경하고 싶은 스타일을 입력해주세요...\n\n예시:\n- 수채화 스타일로 변환\n- 빈티지 사진 느낌으로\n- 만화 스타일로 바꿔줘',
+                'product-mockup': '제품 사진 요구사항을 입력해주세요...\n\n예시:\n- 제품 사진 찍어줘\n- 화이트 배경으로\n- 스튜디오 조명으로',
+                'logo-design': '로고/텍스트 요구사항을 입력해주세요...\n\n예시:\n- 로고 만들어줘\n- 카페 간판 디자인\n- 미니멀한 텍스트 디자인'
+            };
+            return placeholders[mode];
+        }
 
-        copyButton.addEventListener('click', () => {
-            const textToCopy = optimizedOutput.textContent;
-            if (navigator.clipboard && textToCopy !== "최적화된 프롬프트가 여기에 표시됩니다...") {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    // Show toast notification
-                    toast.classList.add('show');
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                    }, 2000);
+        function updateExamples() {
+            const container = document.getElementById('examples-container');
+            container.innerHTML = '';
+            
+            examples[currentMode].forEach(example => {
+                const item = document.createElement('div');
+                item.className = 'example-item';
+                item.innerHTML = `
+                    <div class="example-before">원본: ${example.before}</div>
+                    <div class="example-after">최적화: ${example.after}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
 
-                    // Change button text for feedback
-                    const originalButtonText = copyButton.querySelector('span').textContent;
-                    copyButton.querySelector('span').textContent = '복사 완료!';
-                    copyButton.querySelector('i').className = 'fas fa-check';
-                    setTimeout(() => {
-                        copyButton.querySelector('span').textContent = originalButtonText;
-                        copyButton.querySelector('i').className = 'fas fa-copy';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
+        function optimizePrompt() {
+            const input = document.getElementById('inputPrompt').value.trim();
+            if (!input) {
+                alert('프롬프트를 입력해주세요.');
+                return;
             }
-        });
-    </script>
 
+            const loading = document.getElementById('loading');
+            const output = document.getElementById('outputPrompt');
+            const copyBtn = document.getElementById('copyBtn');
+            const improvements = document.getElementById('improvements');
+
+            loading.style.display = 'block';
+            output.style.display = 'none';
+            copyBtn.style.display = 'none';
+            improvements.style.display = 'none';
+
+            setTimeout(() => {
+                const optimized = getOptimizedPrompt(input, currentMode);
+                
+                loading.style.display = 'none';
+                output.style.display = 'block';
+                output.value = optimized.prompt;
+                copyBtn.style.display = 'block';
+                
+                if (optimized.improvements.length > 0) {
+                    improvements.style.display = 'block';
+                    const improvementsList = document.getElementById('improvementsList');
+                    improvementsList.innerHTML = optimized.improvements.map(imp => 
+                        `<div class="improvement-item">${imp}</div>`
+                    ).join('');
+                }
+            }, 1500);
+        }
+
+        function getOptimizedPrompt(input, mode) {
+            const improvements = [];
+            
+            switch(mode) {
+                case 'text-to-image':
+                    if (input.includes('여자') || input.includes('사람')) {
+                        improvements.push('구체적인 외모, 표정, 포즈 설명 추가');
+                        improvements.push('조명과 카메라 설정 명시');
+                        improvements.push('감정과 분위기 표현 강화');
+                        return {
+                            prompt: 'A photorealistic portrait of a beautiful young woman with detailed facial features, natural expression, and engaging eyes. Set in a well-lit environment with soft, natural lighting. Captured with professional camera settings, creating a warm and inviting atmosphere. High-quality, detailed rendering with realistic textures and lighting.',
+                            improvements
+                        };
+                    } else if (input.includes('고양이') || input.includes('동물')) {
+                        improvements.push('동물의 품종과 색상 구체화');
+                        improvements.push('배경과 환경 설정 추가');
+                        improvements.push('아트 스타일과 렌더링 품질 명시');
+                        return {
+                            prompt: 'A high-quality digital illustration of a fluffy domestic cat with detailed fur texture and expressive eyes, sitting in a natural pose. The scene is set in a cozy indoor environment with warm, soft lighting. Rendered in a realistic art style with rich colors and fine details.',
+                            improvements
+                        };
+                    } else {
+                        improvements.push('더 구체적이고 상세한 설명 추가');
+                        improvements.push('조명과 구도 설정 명시');
+                        improvements.push('아트 스타일과 품질 수준 지정');
+                        return {
+                            prompt: `A high-quality, detailed image of ${input}, rendered with professional lighting and composition. The scene should have rich colors, sharp focus, and excellent visual quality. Create with realistic textures and natural lighting for a polished result.`,
+                            improvements
+                        };
+                    }
+
+                case 'photo-editing':
+                    improvements.push('원본 이미지 보존 조건 명시');
+                    improvements.push('자연스러운 편집을 위한 세부 조건 추가');
+                    improvements.push('조명과 색상 일치성 보장');
+                    
+                    if (input.includes('지워') || input.includes('제거')) {
+                        return {
+                            prompt: 'Using the provided image, please carefully remove the specified elements from the scene. Keep everything else exactly the same, including lighting, shadows, composition, and color grading. Ensure the edited areas blend naturally with the surrounding environment.',
+                            improvements
+                        };
+                    } else if (input.includes('추가') || input.includes('넣어')) {
+                        return {
+                            prompt: 'Using the provided image, please add the specified element to the scene. Make sure it fits naturally with the existing lighting, perspective, and overall composition. The addition should look realistic and seamlessly integrated.',
+                            improvements
+                        };
+                    } else if (input.includes('바꿔') || input.includes('변경')) {
+                        return {
+                            prompt: 'Using the provided image, change the specified element while keeping everything else unchanged. Preserve the original lighting, composition, and style. Ensure the modification looks natural and maintains consistency.',
+                            improvements
+                        };
+                    }
+                    break;
+
+                case 'style-transfer':
+                    improvements.push('스타일의 특징적 요소 구체화');
+                    improvements.push('원본 구성 보존 조건 명시');
+                    improvements.push('색상 팔레트와 텍스처 가이드라인 추가');
+                    
+                    if (input.includes('수채화')) {
+                        return {
+                            prompt: 'Transform the provided image into a beautiful watercolor painting style. Preserve the original composition but render it with soft, flowing watercolor brushstrokes, gentle color bleeds, and the characteristic transparency of watercolor medium.',
+                            improvements
+                        };
+                    } else if (input.includes('빈티지')) {
+                        return {
+                            prompt: 'Transform the provided image into vintage photography style from the 1970s. Add warm, sepia tones, subtle film grain texture, and the characteristic color palette of vintage film photography.',
+                            improvements
+                        };
+                    } else {
+                        return {
+                            prompt: 'Transform the provided image into the specified artistic style while preserving the original composition and subject matter. Apply the characteristic visual elements, color palette, and rendering techniques of the chosen style.',
+                            improvements
+                        };
+                    }
+
+                case 'product-mockup':
+                    improvements.push('전문적인 조명 설정 추가');
+                    improvements.push('카메라 각도와 구도 명시');
+                    improvements.push('배경과 품질 수준 지정');
+                    return {
+                        prompt: 'A high-resolution, professional studio-lit product photograph on a clean, minimal background. The lighting uses a three-point softbox setup to eliminate harsh shadows and create even illumination. Shot from an optimal angle to showcase the key features.',
+                        improvements
+                    };
+
+                case 'logo-design':
+                    improvements.push('브랜드 아이덴티티 요소 강화');
+                    improvements.push('확장성과 활용도 고려');
+                    improvements.push('타이포그래피와 색상 체계 명시');
+                    return {
+                        prompt: 'Create a modern, professional logo design with clean, scalable typography and a sophisticated color scheme. The design should be minimalist yet memorable, working well in both color and monochrome versions.',
+                        improvements
+                    };
+
+                default:
+                    return {
+                        prompt: input,
+                        improvements: ['입력된 프롬프트를 검토해주세요.']
+                    };
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('outputPrompt');
+            output.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '✅ 복사됨!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // 초기 예시 로드
+        updateExamples();
+    </script>
 </body>
 </html>
-
